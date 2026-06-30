@@ -1,0 +1,74 @@
+#include <DHT.h>
+
+#define DHTPIN 2
+#define DHTTYPE DHT22
+
+#define SOIL_PIN A0
+#define BUZZER_PIN 9
+
+DHT dht(DHTPIN, DHTTYPE);
+
+// Change this value after calibration
+int moistureThreshold = 450;
+
+void setup() {
+
+  Serial.begin(9600);
+
+  dht.begin();
+
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  digitalWrite(BUZZER_PIN, LOW);
+
+  Serial.println("Smart Soil Monitoring System Started");
+}
+
+void loop() {
+
+  // Read Soil Moisture
+  int soilValue = analogRead(SOIL_PIN);
+
+  // Read Temperature
+  float temperature = dht.readTemperature();
+
+  // Read Humidity
+  float humidity = dht.readHumidity();
+
+  // Check DHT
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("Failed to read DHT22!");
+    return;
+  }
+
+  Serial.print("Soil Moisture: ");
+  Serial.print(soilValue);
+
+  Serial.print(" | Temperature: ");
+  Serial.print(temperature);
+  Serial.print(" °C");
+
+  Serial.print(" | Humidity: ");
+  Serial.print(humidity);
+  Serial.println(" %");
+
+  // Check soil threshold
+  if (soilValue > moistureThreshold) {
+
+    digitalWrite(BUZZER_PIN, HIGH);
+
+    Serial.println("ALERT : Soil is Dry!");
+
+  }
+  else {
+
+    digitalWrite(BUZZER_PIN, LOW);
+
+    Serial.println("Soil Moisture is OK");
+
+  }
+
+  Serial.println("--------------------------------");
+
+  delay(2000);
+}
